@@ -4,13 +4,18 @@ export LSCOLORS=gxGxxxxxCxxxxxCACEeDeH
 export SVN_MERGE=~/bin/mergewrap.sh
 export PS1='
 \[\e[0;33m\]\h\[\e[1;36m\][\w/]\[\e[m\]
-\[\e[1;34m\]\d, \t\[\e[m\]|\[\e[0;32m\]\u\[\e[m\]$ '
+\[\e[1;34m\]\d, \t\[\e[m\]|\[\e[0;32m\]\u\[\e[m\]\[\e[0;33m\][\!]\[\e[m\]$ '
 
 #ALIASES
 alias vim="vim -p"
 alias resolve="cd \`pwd -P\`"
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
 
-source ~/.bashrc.local
+if [ -f ~/.bashrc.local ]; then
+    source ~/.bashrc.local
+fi
 
 #FUNCTIONS
 function svndiff(){
