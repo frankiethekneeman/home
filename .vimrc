@@ -5,6 +5,7 @@ set shiftwidth=4
 set autoindent
 set ruler
 set cm=blowfish
+set tabpagemax=50
 
 syntax on
 
@@ -42,9 +43,10 @@ inoremap <C-o> :tabfind
 inoremap <C-c> O/** *  */kA
 inoremap <C-l> *  
 
+nnoremap Ox ddkP
+nnoremap Or ddp
 
 colorscheme molokai
 
 let g:badwolf_darkgutter = 1
 let g:badwolf_tabline = 3
-

@@ -52,6 +52,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 export SVN_EDITOR=vim
 export LSCOLORS=gxGxxxxxCxxxxxCACEeDeH
 export SVN_MERGE=~/bin/mergewrap.sh
+export EDITOR=vim
 export PS1='
 \[\e[0;33m\]\h\[\e[1;36m\][\w/]\[\e[m\]
 \[\e[1;34m\]\d, \t\[\e[m\]|\[\e[0;32m\]\u\[\e[m\]\[\e[0;33m\][\!]\[\e[m\]$ '
@@ -65,6 +66,10 @@ fi
 
 if [ -f ~/.bashrc.local ]; then
     source ~/.bashrc.local
+fi
+
+if [ -f ~/.git-completion.bash ]; then
+  source ~/.git-completion.bash
 fi
 
 #FUNCTIONS
