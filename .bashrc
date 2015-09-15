@@ -4,6 +4,10 @@ case $- in
       *) return;;
 esac
 
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
@@ -30,8 +34,17 @@ shopt -s checkwinsize
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
+unamestr=`uname`
+lscolorarg=''
+if [[ "$unamestr" == 'Linux' ]]; then
+    #Linux
+    lscolorarg='--color=auto'
+elif [[ "$unamestr" == 'Darwin' ]]; then
+    #OSX
+    lscolorarg='-G'
+fi
 
-alias ls='ls --color=auto'
+alias ls="ls $lscolorarg"
 #alias dir='dir --color=auto'
 #alias vdir='vdir --color=auto'
 
@@ -60,9 +73,6 @@ export PS1='
 #ALIASES
 alias vim="vim -p"
 alias resolve="cd \`pwd -P\`"
-if [ -f /etc/bashrc ]; then
-    . /etc/bashrc
-fi
 
 if [ -f ~/.bashrc.local ]; then
     source ~/.bashrc.local
@@ -122,3 +132,7 @@ fe80::1%%lo0	$hostname
     sudo $VHOST_STOP
     sudo $VHOST_START
 }
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*

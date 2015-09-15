@@ -50,3 +50,11 @@ colorscheme molokai
 
 let g:badwolf_darkgutter = 1
 let g:badwolf_tabline = 3
+
+set cc=101
+
+highlight lengthWarn ctermbg=234
+au BufWinEnter * match lengthWarn /\%81v.\{1,20}/
+
+highlight OverLength ctermbg=darkred
+au BufWinEnter * 2match OverLength /\%101v.\+/
