@@ -79,8 +79,8 @@ if [ -f ~/.bashrc.local ]; then
     source ~/.bashrc.local
 fi
 
-if [ -f ~/.git-completion.bash ]; then
-  source ~/.git-completion.bash
+if [ -f ~/home/.git-completion.bash ]; then
+  source ~/home/.git-completion.bash
 fi
 
 #FUNCTIONS
