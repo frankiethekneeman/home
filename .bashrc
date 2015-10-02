@@ -69,6 +69,7 @@ export EDITOR=vim
 export PS1='
 \[\e[0;33m\]\h\[\e[1;36m\][\w/]\[\e[m\]
 \[\e[1;34m\]\d, \t\[\e[m\]|\[\e[0;32m\]\u\[\e[m\]\[\e[0;33m\][\!]\[\e[m\]$ '
+export PS2='\[\e[0;33m\][\!]\[\e[m\]> '
 
 #ALIASES
 alias vim="vim -p"
