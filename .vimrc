@@ -23,6 +23,8 @@ nnoremap <C-d> :DiffSaved
 
 nnoremap <tab> >>
 nnoremap <S-tab> <<
+vnoremap <tab> >gv
+vnoremap <S-tab> <gv
 "ARROW KEY TAB NAVIGATION
 nnoremap [1;6D :tabp
 nnoremap [1;6C :tabn
