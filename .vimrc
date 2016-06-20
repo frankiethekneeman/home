@@ -60,3 +60,7 @@ au BufWinEnter * match lengthWarn /\%81v.\{1,20}/
 
 highlight OverLength ctermbg=darkred
 au BufWinEnter * 2match OverLength /\%101v.\+/
+
+au BufRead,BufNewFile *.json set syntax=javascript
+au BufRead,BufNewFile *.js set syntax=es6
+au BufRead,BufNewFile *.scala set syntax=scala
