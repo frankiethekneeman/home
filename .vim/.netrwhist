@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =7
+let g:netrw_dirhist_7='/Users/fsirizzotti/projects/elasticsearch-monitor/deploy/values'
+let g:netrw_dirhist_6='/Users/fsirizzotti/projects/user-signal-service/deploy/templates/service'
+let g:netrw_dirhist_5='/Users/fsirizzotti/projects/gcp-projects/projects/assistant-prod-001'
+let g:netrw_dirhist_4='/Users/fsirizzotti/projects/drone-sonar-plugin/vendor'
+let g:netrw_dirhist_3='/Users/fsirizzotti/projects/user-signal-service/user-signal-service-jobs/src/main/java/com/squarespace/usersignalservice/configuration'
+let g:netrw_dirhist_2='/Users/fsirizzotti/projects/onboarding-terraform/terraform'
+let g:netrw_dirhist_1='/Users/fsirizzotti/projects/squelpy/terraform'

@@ -1,4 +1,9 @@
+# Go away, husky.
+export HUSKY_SKIP_HOOKS=1
+export HUSKY_SKIP_INSTALL=1
+
 # If not running interactively, don't do anything
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 case $- in
     *i*) ;;
       *) return;;
@@ -135,5 +140,10 @@ fe80::1%%lo0	$hostname
 }
 
 export PATH="$PATH:$HOME/.rvm/bin:./node_modules/.bin" # Add RVM to PATH for scripting
+export PATH="$PATH:./node_modules/.bin" #Add the local node_modules for dev dep execution
+
+. $DIR/kube.rc
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+[[ -s  "/usr/local/opt/asdf/libexec/asdf.sh" ]] && source "/usr/local/opt/asdf/libexec/asdf.sh"

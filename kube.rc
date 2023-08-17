@@ -1,0 +1,11 @@
+kctx() {
+    if [ "$#" == 0 ]
+    then
+        kubectl config get-contexts
+    else
+        kubectl config use-context "$@"
+    fi
+}
+
+alias ka="kubectl apply -f"
+alias kg="kubectl get"
