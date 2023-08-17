@@ -146,4 +146,5 @@ export PATH="$PATH:./node_modules/.bin" #Add the local node_modules for dev dep 
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
-[[ -s  "/usr/local/opt/asdf/libexec/asdf.sh" ]] && source "/usr/local/opt/asdf/libexec/asdf.sh"
+[[ -s  "$HOME/.asdf/asdf.sh" ]] && source "$HOME/.asdf/asdf.sh"
+[[ -s  "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"
