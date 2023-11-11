@@ -1,0 +1,16 @@
+lscolorarg=''
+if [[ "$KERNEL" == 'Linux' ]]; then
+    #Linux
+    lscolorarg='--color=auto'
+elif [[ "$KERNEL" == 'Darwin' ]]; then
+    #OSX
+    lscolorarg='-G'
+fi
+
+export LSCOLORS=gxGxxxxxCxxxxxCACEeDeH
+
+alias ls="ls $lscolorarg"
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'

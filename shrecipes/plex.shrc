@@ -1,0 +1,13 @@
+function seasonName() {
+    SEASON="${1:?Please provide the Season Identifier}";
+    SHOW="$(basename "$(dirname "$PWD")")";
+    find . -maxdepth 1 -type f -print0 | while read -d '' FILE; do
+        mv "${FILE:2}" "$SHOW - s${SEASON}e${FILE:2}";
+    done
+}
+
+function plexName() { 
+	FILE="${1:?Please choose the file to name}"
+    MOVIE="$(basename "$PWD")";
+	mv "${FILE}" "$MOVIE.${FILE##*.}"
+}

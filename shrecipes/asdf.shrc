@@ -1,0 +1,6 @@
+export ASDF_PLUGIN_MANAGER_PLUGIN_VERSIONS_FILENAME=$HOME/home/.plugin-versions
+
+# Load ASDF
+[[ -s  "$HOME/.asdf/asdf.sh" ]] && source "$HOME/.asdf/asdf.sh"
+# Load ASDF Bash Completions
+[[ -s  "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"

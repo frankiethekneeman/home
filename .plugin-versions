@@ -1,0 +1,3 @@
+asdf-plugin-manager  https://github.com/asdf-community/asdf-plugin-manager  07a8a5a
+haskell              https://github.com/asdf-community/asdf-haskell.git     b614362
+kubectl              https://github.com/asdf-community/asdf-kubectl.git     cbe6df4

@@ -1,0 +1,13 @@
+# SVN
+export SVN_EDITOR=vim
+export SVN_MERGE=~/bin/mergewrap.sh
+function codebase(){
+    grep -irl "$1" . 2>/dev/null | grep -v '/\.svn/'| xargs -n1 grep -iHn "$1"
+}
+
+#GIT
+export EDITOR=vim
+
+if [ -f ~/home/.git-completion.bash ]; then
+  source ~/home/.git-completion.bash
+fi
