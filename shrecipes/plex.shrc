@@ -1,3 +1,14 @@
+PLEX_EXTRA_FOLDERS=(
+"Behind The Scenes"
+"Deleted Scenes"
+"Featurettes"
+"Interviews"
+"Scenes"
+"Shorts"
+"Trailers"
+"Other"
+)
+
 function seasonName() {
     SEASON="${1:?Please provide the Season Identifier}";
     SHOW="$(basename "$(dirname "$PWD")")";
@@ -10,4 +21,12 @@ function plexName() {
 	FILE="${1:?Please choose the file to name}"
     MOVIE="$(basename "$PWD")";
 	mv "${FILE}" "$MOVIE.${FILE##*.}"
+}
+
+function mkExtrasFolders() {
+    mkdir "${PLEX_EXTRA_FOLDERS[@]}"
+}
+
+function rmExtrasFolders() {
+    rmdir --ignore-fail-on-non-empty "${PLEX_EXTRA_FOLDERS[@]}"
 }
