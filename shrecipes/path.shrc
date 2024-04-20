@@ -1,2 +1,4 @@
 export PATH="$PATH:./node_modules/.bin" #Add the local node_modules for dev dep execution
 export PATH="$PATH:$HOME/.cabal/bin" #Add cabal binaries
+export PATH="$PATH:$HOME/home/bin" #Add cabal binaries
+
