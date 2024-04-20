@@ -23,8 +23,6 @@ else
     echo "ASDF Plugin Manager not detected, installing"
     asdf plugin add asdf-plugin-manager https://github.com/asdf-community/asdf-plugin-manager.git
     asdf plugin update asdf-plugin-manager v$ASDF_PLUGIN_MANAGER_VERSION
-
-    #asdf global asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION
 fi
 
 if (asdf list asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION >/dev/null 2>&1)
