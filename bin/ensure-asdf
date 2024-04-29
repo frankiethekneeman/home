@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+. $HOME/home/conf/asdf.env
+
+echo "Assuming Git and Curl are installed..."
+
+if [ -d $ASDF_INSTALL_LOCATION ]
+then
+    echo "ASDF Already installed at $ASDF_INSTALL_LOCATION"
+else 
+    echo "ASDF not detected, installing"
+    git clone $ASDF_REPO $ASDF_INSTALL_LOCATION --branch $ASDF_VERSION
+
+    #If ASDF wasn't installed, this shrecipe is harmless, but now it needs rerunning.
+    source $HOME/home/shrecipes/asdf.shrc
+fi
+
+if (asdf plugin list | grep -s asdf-plugin-manager) 
+then
+    echo "ASDF Plugin Already installed: $(asdf plugin list | grep asdf-plugin-manager)"
+else
+    echo "ASDF Plugin Manager not detected, installing"
+    asdf plugin add asdf-plugin-manager https://github.com/asdf-community/asdf-plugin-manager.git
+    asdf plugin update asdf-plugin-manager v$ASDF_PLUGIN_MANAGER_VERSION
+fi
+
+if (asdf list asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION >/dev/null 2>&1)
+then 
+    echo "Plugin Manager CLI correctly installed"
+else
+    echo "Installing ASDF Plugin Manager CLI"
+    asdf install asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION
+fi
+
+if (asdf current asdf-plugin-manager >/dev/null 2>&1)
+then
+    echo "Plugin Manager CLI Version already set, refusing to override local configuration"
+else
+    echo "Setting Global version to $ASDF_PLUGIN_MANAGER_VERSION"
+    asdf global asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION
+fi
+
+asdf-plugin-manager add-all
