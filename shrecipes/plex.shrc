@@ -20,7 +20,14 @@ function seasonName() {
 function plexName() { 
 	FILE="${1:?Please choose the file to name}"
     MOVIE="$(basename "$PWD")";
-	mv "${FILE}" "$MOVIE.${FILE##*.}"
+    shift
+    ADDITIONAL=""
+    if (($#)) 
+    then
+        ADDITIONAL=" - $@"
+        
+    fi
+	mv "${FILE}" "$MOVIE$ADDITIONAL.${FILE##*.}"
 }
 
 function mkExtrasFolders() {
@@ -29,4 +36,95 @@ function mkExtrasFolders() {
 
 function rmExtrasFolders() {
     rmdir --ignore-fail-on-non-empty "${PLEX_EXTRA_FOLDERS[@]}"
+}
+
+function mkLinkScript() {
+    REMOTE_MOUNT_POINT="${1:?Please provide the mount point on the NAS}";
+    MOVIE="$(basename "$PWD")";
+    BASE_VERSION="${MOVIE%% \{edition-*}"
+    MOUNT_ROOT=$(findmnt -nfT . -o TARGET)
+    echo "cd \"$REMOTE_MOUNT_POINT${PWD#$MOUNT_ROOT}\""
+    for folder in "${PLEX_EXTRA_FOLDERS[@]}"
+    do
+        if [ -e "$folder" ] && ! [ -L "$folder" ]
+        then
+            echo "echo \"~$folder~ already exists, refusing to clobber\"" 
+            continue
+        fi
+        target="../$BASE_VERSION/$folder"
+        if [ -d "$target" ]
+        then
+            echo "echo \"Linking $MOVIE/$folder to $target\""
+            echo "ln -s \"$target\" \"$folder\""
+        elif [ -f "$target" ]
+        then
+            echo "echo \"~$target~ exists, but is not a folder?\""
+        else 
+            echo "echo \"~$target~ is missing, skip.\""
+        fi
+    done
+}
+
+function printTracks() {
+    FILE="${1:?Please provide a filename to print the tracks of}"
+    FORMAT="${2:-'\(.id): \(.properties.track_name) - \(.properties.language) (\(.codec) - Default? \(.properties.default_track))'}"
+    mkvmerge -J "$FILE" | \
+        jq '.tracks[] | select ( .type == "audio" or .type == "subtitles") | "'"$FORMAT"'"'
+}
+
+function labelTracks() {
+    trackNo=0
+    while (($#));
+    do
+        if [ "${1,,}" == "true" ] || [ "${1,,}" == "false" ];
+        then
+          echo --default-track-flag
+          echo $trackNo:${1,,}
+        else
+          echo --track-name
+          echo $((++trackNo)):${1@Q}
+        fi
+        shift
+    done
+}
+
+function labelTracksEdit() {
+    trackNo=1
+    while (($#));
+    do
+        case "${1,,}" in
+          -h)
+            echo
+            echo "Usage: \"labelTracksEdit [trackName [option]*]*\""
+            echo "  trackName is an arbitary string"
+            echo "  options modify the previously named track:"
+            echo "    true - set the track as a default track"
+            echo "    false - set the track as a non-default track"
+            echo "    commentary - set the track as commentary"
+            echo "    sdh - mark the track as for the hearing impaired"
+            echo "    vi - mark the track as for the visual impaired"
+            echo "    l:<language> - se tthe track langauge"
+            return
+            ;;
+          true|false)
+            echo "--set flag-default=${1,,}"
+            ;;
+          commentary)
+            echo "--set flag-commentary=true"
+            ;;
+          sdh)
+            echo "--set flag-hearing-impaired=true"
+            ;;
+          vi)
+            echo "--set flag-visual-impaired=true"
+            ;;
+          l:*)
+            echo "--set language=${1:2}"
+            ;;
+          *)
+            echo "-e track:$((++trackNo))"
+            echo "--set name=${1@Q}"
+        esac
+        shift
+    done
 }
