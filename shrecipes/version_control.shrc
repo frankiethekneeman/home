@@ -11,3 +11,7 @@ export EDITOR=vim
 if [ -f ~/home/.git-completion.bash ]; then
   source ~/home/.git-completion.bash
 fi
+
+function unlockKey() {
+    gpg --status-fd=2 -bsau $(git config --get user.signingkey)
+}
