@@ -1,6 +1,9 @@
 export ASDF_PLUGIN_MANAGER_PLUGIN_VERSIONS_FILENAME=$HOME/home/.plugin-versions
 . $HOME/home/conf/asdf.env
 
+# Golang
+export ASDF_GOLANG_MOD_VERSION_ENABLED=true
+
 # Load ASDF
 [[ -s  "$ASDF_INSTALL_LOCATION/asdf.sh" ]] && source "$ASDF_INSTALL_LOCATION/asdf.sh"
 # Load ASDF Bash Completions
