@@ -1,3 +1,4 @@
 # Go away, husky.
-export HUSKY_SKIP_HOOKS=1 #Do not let husky run hooks
-export HUSKY_SKIP_INSTALL=1 #Do not let husky install itself.
+export HUSKY_SKIP_HOOKS=1 #Do not let husky run hooks, prior to v5
+export HUSKY_SKIP_INSTALL=1 #Do not let husky install itself, prior to v5
+export HUSKY=0 #Do not allow husky to do anything, v5 and later
