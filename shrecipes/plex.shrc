@@ -65,6 +65,23 @@ function mkLinkScript() {
     done
 }
 
+function mkTvLinkScript() {
+    find . -maxdepth 1 -mindepth 1 -type d | cut -c 3- | while read SEASON
+    do
+        for TYPE in "${PLEX_EXTRA_FOLDERS[@]}"
+        do
+            if [ -d "$SEASON/$TYPE" ]
+            then
+                echo mkdir \"$TYPE\"
+                (cd "$SEASON/$TYPE" && ls) | while read EXTRA
+                do
+                    echo ln -s \"../$SEASON/$TYPE/$EXTRA\" \"$TYPE/$SEASON - $EXTRA\"
+                done
+            fi
+        done
+    done
+}
+
 function printTracks() {
     FILE="${1:?Please provide a filename to print the tracks of}"
     FORMAT="${2:-'\(.id): \(.properties.track_name) - \(.properties.language) (\(.codec) - Default? \(.properties.default_track))'}"
@@ -127,4 +144,41 @@ function labelTracksEdit() {
         esac
         shift
     done
+}
+
+PGS_HEADER=5047
+
+function extractPGSTimestamps() {
+    MKV=${1:?Provide an MKV file to extract timestamps from}
+    TRACK=${2:?Which Track contains the PGS subtitles you care about?}
+    FILE=$(mktemp)
+
+    mkvextract "$MKV" tracks "$TRACK:$FILE"
+
+    function HEXDUMP() {
+        od -x --endian=big -An $1 | tr -d '\n' | tr -d ' '
+    }
+
+    for HEXSTAMP in $(HEXDUMP $FILE | grep -o $PGS_HEADER........ | uniq | cut -c 5-)
+    do 
+        OFFSET=$((0x$HEXSTAMP / 90000))
+        H=$(($OFFSET / 3600))
+        M=$((( $OFFSET - $H * 3600 ) / 60))
+        S=$(($OFFSET - ($H * 60 + $M) * 60))
+        printf "%02d:%02d:%02d\n" $H $M $S
+    done
+
+    rm $FILE
+}
+
+function extractVobSubTimestamps() {
+    MKV=${1:?Provide an MKV file to extract timestamps from}
+    TRACK=${2:?Which Track contains the PGS subtitles you care about?}
+    FILE=$(mktemp)
+
+    mkvextract "$MKV" tracks "$TRACK:$FILE.sub"
+    grep -Eo '^timestamp: [0-9]{2}:[0-9]{2}:[0-9]{2}:[0-9]+' $FILE.idx | cut -c 12-
+
+    rm $FILE{.sub,.idx}
+
 }
