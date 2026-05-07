@@ -1,0 +1,4 @@
+getLibraryVersion() {
+    HASH=${1?The first argument to this script should be a commit SHA}
+    TZ=UTC0 git show --format=v0.0.0-%ad-%H --date=format-local:%Y%m%d%H%M%S $HASH | head -c 34
+}

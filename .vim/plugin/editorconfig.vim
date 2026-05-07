@@ -78,6 +78,7 @@ function! s:FindPythonInterp() " {{{1
                     \ 'python26',
                     \ 'python25',
                     \ 'python24',
+                    \ 'python3',
                     \ '/usr/local/bin/python',
                     \ '/usr/local/bin/python27',
                     \ '/usr/local/bin/python26',

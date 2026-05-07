@@ -19,6 +19,24 @@ endfunction
 
 com! DiffSaved call s:DiffWithSaved() 
 
+function! s:DraftMode()
+    set textwidth=0
+    set wrapmargin=0
+    set wrap
+    set linebreak
+    set columns=80
+    match none
+    2match none
+endfunction
+
+com! Draft call s:DraftMode()
+
+function s:YankToClipboard() 
+    normal! "*yy
+endfunction
+
+com! C call s:YankToClipboard()
+
 nnoremap <C-d> :DiffSaved
 
 nnoremap <tab> >>

@@ -1,0 +1,3 @@
+export CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1
+export PORTABLE_CLAUDE="--add-dir $HOME/home/claude --settings $HOME/home/claude/settings.json"
+alias claude="claude $PORTABLE_CLAUDE"
