@@ -21,6 +21,6 @@ _merge_settings() {
 # Merge ~/home/claude/settings.json with one or more settings files.
 # Later files win. Use in aliases:
 #   alias claude-foo="claude --settings=\"\$(mksettings foo.json bar.json)\""
-mksettings() {
+function mksettings() {
     _merge_settings "$HOME/home/claude/settings.json" "$@"
 }

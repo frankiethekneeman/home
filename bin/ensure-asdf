@@ -1,44 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-. $HOME/home/conf/asdf.env
-
-echo "Assuming Git and Curl are installed..."
-
-if [ -d $ASDF_INSTALL_LOCATION ]
+if ! command -v asdf &>/dev/null
 then
-    echo "ASDF Already installed at $ASDF_INSTALL_LOCATION"
-else 
-    echo "ASDF not detected, installing"
-    git clone $ASDF_REPO $ASDF_INSTALL_LOCATION --branch $ASDF_VERSION
+    cat >&2 <<'EOF'
+asdf is not installed.
 
-    #If ASDF wasn't installed, this shrecipe is harmless, but now it needs rerunning.
-    source $HOME/home/shrecipes/asdf.shrc
+  https://github.com/asdf-vm/asdf/releases
+
+Once you have a tarball URL, run:
+  install-asdf <url-to-.tar.gz>
+EOF
+    exit 1
 fi
 
-if (asdf plugin list | grep -s asdf-plugin-manager) 
+echo "asdf found: $(asdf version) at $(command -v asdf)"
+
+. "$HOME/home/conf/asdf.env"
+
+if asdf plugin list 2>/dev/null | grep -q asdf-plugin-manager
 then
-    echo "ASDF Plugin Already installed: $(asdf plugin list | grep asdf-plugin-manager)"
+    echo "asdf-plugin-manager plugin already installed"
 else
-    echo "ASDF Plugin Manager not detected, installing"
+    echo "asdf-plugin-manager plugin not found, installing..."
     asdf plugin add asdf-plugin-manager https://github.com/asdf-community/asdf-plugin-manager.git
-    asdf plugin update asdf-plugin-manager v$ASDF_PLUGIN_MANAGER_VERSION
+    asdf plugin update asdf-plugin-manager v1.5.0
 fi
 
-if (asdf list asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION >/dev/null 2>&1)
-then 
-    echo "Plugin Manager CLI correctly installed"
-else
-    echo "Installing ASDF Plugin Manager CLI"
-    asdf install asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION
-fi
-
-if (asdf current asdf-plugin-manager >/dev/null 2>&1)
+if asdf list asdf-plugin-manager | grep -s "$ASDF_PLUGIN_MANAGER_VERSION" &>/dev/null
 then
-    echo "Plugin Manager CLI Version already set, refusing to override local configuration"
+    echo "asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION already installed"
 else
-    echo "Setting Global version to $ASDF_PLUGIN_MANAGER_VERSION"
-    asdf global asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION
+    echo "Installing asdf-plugin-manager $ASDF_PLUGIN_MANAGER_VERSION..."
+    asdf install asdf-plugin-manager "$ASDF_PLUGIN_MANAGER_VERSION"
 fi
 
+if asdf current asdf-plugin-manager &>/dev/null
+then
+    echo "asdf-plugin-manager version already set, leaving alone"
+else
+    echo "Setting global asdf-plugin-manager to $ASDF_PLUGIN_MANAGER_VERSION"
+    asdf set -u asdf-plugin-manager "$ASDF_PLUGIN_MANAGER_VERSION"
+fi
+
+echo "Running asdf-plugin-manager add-all..."
 asdf-plugin-manager add-all

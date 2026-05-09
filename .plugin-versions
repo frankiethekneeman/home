@@ -1,3 +1,6 @@
-asdf-plugin-manager  https://github.com/asdf-community/asdf-plugin-manager  07a8a5a
-haskell              https://github.com/asdf-community/asdf-haskell.git     b614362
-kubectl              https://github.com/asdf-community/asdf-kubectl.git     cbe6df4
+asdf-plugin-manager  https://github.com/asdf-community/asdf-plugin-manager.git  f1cc7390168e10e2f7ebc044293957fe72009d5b
+direnv               https://github.com/asdf-community/asdf-direnv.git          0c76b1629a21293233bc4060fbea85e51d59edfb
+github-cli           https://github.com/bartlomiejdanek/asdf-github-cli.git     e0605b704ef3829e10a9353b91b4c0bafa5e5582
+haskell              https://github.com/asdf-community/asdf-haskell.git         cabd4cd8ad99b717dacce8f26c8cc7de3546b373
+jq                   https://github.com/lsanwick/asdf-jq.git                    addae5118090263aa43ca9eb998b250b10c7d2dd
+kubectl              https://github.com/asdf-community/asdf-kubectl.git         95b2e20e381b10dba52b4f66bea94fa2ee083f43
