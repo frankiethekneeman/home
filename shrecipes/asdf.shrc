@@ -5,6 +5,18 @@ export ASDF_PLUGIN_MANAGER_PLUGIN_VERSIONS_FILENAME=$HOME/home/.plugin-versions
 export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 
 # Load ASDF
-[[ -s  "$ASDF_INSTALL_LOCATION/asdf.sh" ]] && source "$ASDF_INSTALL_LOCATION/asdf.sh"
+if [[ -s  "$ASDF_INSTALL_LOCATION/asdf.sh" ]]
+then
+    source "$ASDF_INSTALL_LOCATION/asdf.sh"
+elif [[ -d  "$ASDF_INSTALL_LOCATION/shims" ]]
+then
+    export PATH="${ASDF_INSTALL_LOCATION}/shims:$PATH"
+fi
 # Load ASDF Bash Completions
-[[ -s  "$ASDF_INSTALL_LOCATION/completions/asdf.bash" ]] && source "$ASDF_INSTALL_LOCATION/completions/asdf.bash"
+if [[ -s  "$ASDF_INSTALL_LOCATION/completions/asdf.bash" ]]
+then
+    source "$ASDF_INSTALL_LOCATION/completions/asdf.bash"
+elif command -v asdf &> /dev/null
+then
+    . <(asdf completion bash)
+fi
