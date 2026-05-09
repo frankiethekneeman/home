@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. "$HOME/home/shrecipes/identity.shrc"
+
+PASS=0
+FAIL=0
+TMPCONFIG=$(mktemp)
+EXPECTED=$(mktemp)
+SSH_CONFIG_FILE="$TMPCONFIG"
+trap 'rm -f "$TMPCONFIG" "$EXPECTED"' EXIT
+
+pass() { printf 'PASS: %s\n' "$1"; PASS=$((PASS + 1)); }
+fail() { printf 'FAIL: %s\n' "$1"; diff -u "$EXPECTED" "$TMPCONFIG" || true; FAIL=$((FAIL + 1)); }
+
+check() {
+    local desc="$1"
+    if diff -q "$EXPECTED" "$TMPCONFIG" > /dev/null 2>&1
+    then
+        pass "$desc"
+    else
+        fail "$desc"
+    fi
+}
+
+BLOCK_A="    HostName github.com
+    User git
+    IdentityFile /key/a
+    IdentitiesOnly yes"
+
+BLOCK_B="    HostName github.com
+    User git
+    IdentityFile /key/b
+    IdentitiesOnly yes"
+
+BLOCK_SIDE="    HostName side.com
+    IdentityFile /key/side"
+
+# 1: Adding to an empty file
+> "$TMPCONFIG"
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+printf 'Host github.com\n%s\n' "$BLOCK_A" > "$EXPECTED"
+check "1: Adding to an empty file"
+
+# 2: Adding to a non-empty file
+> "$TMPCONFIG"
+addSshBlock "other.com" "$BLOCK_SIDE" &>/dev/null
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+{
+    printf 'Host other.com\n%s\n' "$BLOCK_SIDE"
+    printf '\n'
+    printf 'Host github.com\n%s\n' "$BLOCK_A"
+} > "$EXPECTED"
+check "2: Adding to a non-empty file"
+
+# 3: Override with the same info
+> "$TMPCONFIG"
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+printf 'Host github.com\n%s\n' "$BLOCK_A" > "$EXPECTED"
+check "3: Override with the same info"
+
+# 4: Override with new info
+> "$TMPCONFIG"
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+addSshBlock "github.com" "$BLOCK_B" &>/dev/null
+printf 'Host github.com\n%s\n' "$BLOCK_B" > "$EXPECTED"
+check "4: Override with new info"
+
+# 5a: Override first block
+> "$TMPCONFIG"
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+addSshBlock "other.com"  "$BLOCK_SIDE" &>/dev/null
+addSshBlock "github.com" "$BLOCK_B" &>/dev/null
+{
+    printf 'Host github.com\n%s\n' "$BLOCK_B"
+    printf '\n'
+    printf 'Host other.com\n%s\n' "$BLOCK_SIDE"
+} > "$EXPECTED"
+check "5a: Override first block"
+
+# 5b: Override last block
+> "$TMPCONFIG"
+addSshBlock "other.com"  "$BLOCK_SIDE" &>/dev/null
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+addSshBlock "github.com" "$BLOCK_B" &>/dev/null
+{
+    printf 'Host other.com\n%s\n' "$BLOCK_SIDE"
+    printf '\n'
+    printf 'Host github.com\n%s\n' "$BLOCK_B"
+} > "$EXPECTED"
+check "5b: Override last block"
+
+# 5c: Override middle block
+> "$TMPCONFIG"
+addSshBlock "other1.com" "$BLOCK_SIDE" &>/dev/null
+addSshBlock "github.com" "$BLOCK_A" &>/dev/null
+addSshBlock "other2.com" "$BLOCK_SIDE" &>/dev/null
+addSshBlock "github.com" "$BLOCK_B" &>/dev/null
+{
+    printf 'Host other1.com\n%s\n' "$BLOCK_SIDE"
+    printf '\n'
+    printf 'Host github.com\n%s\n' "$BLOCK_B"
+    printf '\n'
+    printf 'Host other2.com\n%s\n' "$BLOCK_SIDE"
+} > "$EXPECTED"
+check "5c: Override middle block"
+
+printf '\n%d passed, %d failed\n' "$PASS" "$FAIL"
+[[ "$FAIL" -eq 0 ]]
