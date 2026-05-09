@@ -1,3 +1,26 @@
 export CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1
 export PORTABLE_CLAUDE="--add-dir $HOME/home/claude --settings $HOME/home/claude/settings.json"
 alias claude="claude $PORTABLE_CLAUDE"
+
+if command -v md5sum >/dev/null 2>&1; then
+    _md5() { md5sum | awk '{print $1}'; }
+else
+    _md5() { md5 -q; }
+fi
+
+_merge_settings() {
+    local hash cache
+    hash=$(cat "$@" | _md5)
+    cache="/tmp/claude-merged-${hash}.json"
+    if [ ! -f "$cache" ]; then
+        jq -s 'reduce .[] as $x ({}; . * $x)' "$@" > "$cache"
+    fi
+    echo "$cache"
+}
+
+# Merge ~/home/claude/settings.json with one or more settings files.
+# Later files win. Use in aliases:
+#   alias claude-foo="claude --settings=\"\$(mksettings foo.json bar.json)\""
+mksettings() {
+    _merge_settings "$HOME/home/claude/settings.json" "$@"
+}
