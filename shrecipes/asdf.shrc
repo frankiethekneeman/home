@@ -10,7 +10,7 @@ then
     source "$ASDF_INSTALL_LOCATION/asdf.sh"
 elif [[ -d  "$ASDF_INSTALL_LOCATION/shims" ]]
 then
-    export PATH="${ASDF_INSTALL_LOCATION}/shims:$PATH"
+    path_prepend "${ASDF_INSTALL_LOCATION}/shims"
 fi
 # Load ASDF Bash Completions
 if [[ -s  "$ASDF_INSTALL_LOCATION/completions/asdf.bash" ]]

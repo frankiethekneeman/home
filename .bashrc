@@ -32,6 +32,20 @@ function alertf(){
     notify-send --urgency=low -i $icon "$summary"
 }
 
+path_append() {
+    case ":${PATH}:" in
+        *":${1}:"*) ;;
+        *) export PATH="${PATH}:${1}" ;;
+    esac
+}
+
+path_prepend() {
+    case ":${PATH}:" in
+        *":${1}:"*) ;;
+        *) export PATH="${1}:${PATH}" ;;
+    esac
+}
+
 recipesDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"/shrecipes
 
 #Load in smaller recipe files
