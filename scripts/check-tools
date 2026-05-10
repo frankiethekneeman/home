@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Checks for tools this dotfiles repo depends on that cannot be managed by asdf.
+# Exits non-zero if any required tools are missing.
+
+_open_url() {
+    local url="$1"
+    if command -v explorer.exe &>/dev/null
+    then
+        explorer.exe "$url"
+    elif [[ "$(uname)" == "Darwin" ]]
+    then
+        open "$url"
+    elif command -v xdg-open &>/dev/null
+    then
+        xdg-open "$url" &>/dev/null &
+    else
+        printf '    %s\n' "$url"
+        return 1
+    fi
+}
+
+declare -A TOOL_URLS=(
+    # runtime version manager — manages all dev tools
+    [asdf]="https://github.com/asdf-vm/asdf/releases"
+    # version control
+    [git]="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"
+    # commit signing, not available via asdf
+    [gpg]="https://gnupg.org/download/"
+    # needed to install/upgrade asdf
+    [curl]="https://curl.se/download.html"
+)
+
+missing_names=()
+
+for name in "${!TOOL_URLS[@]}"
+do
+    if command -v "$name" &>/dev/null
+    then
+        echo "✓ $name"
+    else
+        echo "✗ $name"
+        missing_names+=("$name")
+    fi
+done
+
+if [[ ${#missing_names[@]} -eq 0 ]]
+then
+    exit 0
+fi
+
+echo ""
+echo "${#missing_names[@]} tool(s) missing."
+
+if [[ -t 0 ]]
+then
+    echo
+    printf 'Open installation docs in browser? [Y/n] '
+    read -r answer
+    if [[ "${answer,,}" != "n" ]]
+    then
+        no_browser=0
+        for name in "${missing_names[@]}"
+        do
+            printf 'Opening docs for %s...\n' "$name"
+            _open_url "${TOOL_URLS[$name]}" || no_browser=1
+            sleep 0.3
+        done
+        [[ $no_browser -eq 1 ]] && echo "(No browser opener found — URLs printed above)"
+    fi
+fi
+
+exit 1

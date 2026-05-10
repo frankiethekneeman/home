@@ -5,6 +5,78 @@ export ASDF_PLUGIN_MANAGER_PLUGIN_VERSIONS_FILENAME=$HOME/home/.plugin-versions
 export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 
 # Load ASDF
-[[ -s  "$ASDF_INSTALL_LOCATION/asdf.sh" ]] && source "$ASDF_INSTALL_LOCATION/asdf.sh"
+if [[ -s  "$ASDF_INSTALL_LOCATION/asdf.sh" ]]
+then
+    source "$ASDF_INSTALL_LOCATION/asdf.sh"
+elif [[ -d  "$ASDF_INSTALL_LOCATION/shims" ]]
+then
+    path_prepend "${ASDF_INSTALL_LOCATION}/shims"
+fi
 # Load ASDF Bash Completions
-[[ -s  "$ASDF_INSTALL_LOCATION/completions/asdf.bash" ]] && source "$ASDF_INSTALL_LOCATION/completions/asdf.bash"
+if [[ -s  "$ASDF_INSTALL_LOCATION/completions/asdf.bash" ]]
+then
+    source "$ASDF_INSTALL_LOCATION/completions/asdf.bash"
+elif command -v asdf &> /dev/null
+then
+    . <(asdf completion bash)
+fi
+
+install-asdf() {
+    URL="${1:?Please provide the tarball URL from https://github.com/asdf-vm/asdf/releases}"
+    local install_dir binary_path tmp tarball md5_file expected actual binary
+
+    if command -v asdf &>/dev/null
+    then
+        binary_path=$(command -v asdf)
+        install_dir=$(dirname "$binary_path")
+        echo "Existing asdf found at $binary_path — will overwrite."
+    else
+        install_dir="/usr/local/bin"
+        echo "No existing asdf found, installing to $install_dir"
+    fi
+
+    tmp=$(mktemp -d)
+    tarball="$tmp/asdf.tar.gz"
+    md5_file="$tmp/asdf.tar.gz.md5"
+
+    echo "Fetching tarball..."
+    curl -fsSL -o "$tarball" "$URL" || { rm -rf "$tmp"; return 1; }
+
+    echo "Fetching checksum..."
+    curl -fsSL -o "$md5_file" "${URL}.md5" || { rm -rf "$tmp"; return 1; }
+
+    echo "Verifying checksum..."
+    expected=$(awk '{print $1}' "$md5_file")
+    actual=$(_md5 < "$tarball")
+
+    if [[ "$expected" != "$actual" ]]
+    then
+        echo "Checksum mismatch!" >&2
+        echo "  expected: $expected" >&2
+        echo "  actual:   $actual" >&2
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    echo "Checksum OK. Extracting..."
+    tar -xzf "$tarball" -C "$tmp" || { rm -rf "$tmp"; return 1; }
+
+    binary=$(find "$tmp" -name "asdf" -type f | head -1)
+    if [[ -z "$binary" ]]
+    then
+        echo "Could not find asdf binary in tarball. Contents:" >&2
+        find "$tmp" -type f | head -20 >&2
+        rm -rf "$tmp"
+        return 1
+    fi
+
+    if [[ -w "$install_dir" ]]
+    then
+        install -m 755 "$binary" "$install_dir/asdf"
+    else
+        echo "$install_dir is not writable, using sudo..."
+        sudo install -m 755 "$binary" "$install_dir/asdf"
+    fi
+    rm -rf "$tmp"
+    echo "Installed asdf to $install_dir/asdf"
+}

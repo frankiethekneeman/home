@@ -15,3 +15,27 @@ fi
 function unlockKey() {
     gpg --status-fd=2 -bsau $(git config --get user.signingkey)
 }
+
+function git-ssh() {
+    local url
+    url=$(git remote get-url origin 2>/dev/null) || {
+        echo "No 'origin' remote found." >&2
+        return 1
+    }
+
+    local new_url
+    if [[ "$url" =~ ^https://github\.com/(.+)$ ]]
+    then
+        new_url="git@github.com:${BASH_REMATCH[1]}"
+    elif [[ "$url" =~ ^git@github\.com: ]]
+    then
+        echo "origin is already using SSH: $url"
+        return 0
+    else
+        echo "origin doesn't look like a GitHub HTTPS URL: $url" >&2
+        return 1
+    fi
+
+    git remote set-url origin "$new_url"
+    echo "$url → $new_url"
+}

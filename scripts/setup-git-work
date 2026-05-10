@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. "$HOME/home/shrecipes/identity.shrc"
+
+WORK_EMAIL="${1:?Please provide your work email address}"
+
+
+if [[ ! -f "$PERSONAL_SSH_KEY" ]]
+then
+    echo "No personal SSH key at $PERSONAL_SSH_KEY — run bootstrap first." >&2
+    exit 1
+fi
+
+echo "=== Generating work SSH key ==="
+genSshKey "$PERSONAL_NAME work - GitHub" "$WORK_SSH_KEY"
+
+echo ""
+echo "=== Generating work GPG key ==="
+genGpgKey "$PERSONAL_NAME (work GitHub) <$WORK_EMAIL>" "$WORK_EMAIL"
+
+WORK_FINGERPRINT=$(getGpgFingerprint "$WORK_EMAIL")
+
+echo ""
+echo "Setting global git identity to work..."
+git config --global user.name "$PERSONAL_NAME"
+git config --global user.email "$WORK_EMAIL"
+git config --global user.signingkey "$WORK_FINGERPRINT"
+git config --global commit.gpgsign true
+echo "Git config set."
+
+echo "Configuring SSH..."
+ensureSshConfig
+addSshBlock "github.com" "    HostName github.com
+    User git
+    IdentityFile $WORK_SSH_KEY
+    IdentitiesOnly yes"
+
+addSshBlock "github.com-personal" "    HostName github.com
+    User git
+    IdentityFile $PERSONAL_SSH_KEY
+    IdentitiesOnly yes"
+
+cat <<EOF
+
+=== Work setup complete ===
+
+Add your work SSH public key to GitHub:
+EOF
+cat "$WORK_SSH_KEY.pub"
+
+cat <<EOF
+
+Add your work GPG key to GitHub:
+EOF
+gpg --armor --export "$WORK_FINGERPRINT"

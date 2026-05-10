@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. "$HOME/home/shrecipes/identity.shrc"
+
+printf '\n=== Checking required tools ===\n'
+"$HOME/home/bin/check-tools" || exit 1
+
+printf '\n=== Ensuring asdf ===\n'
+"$HOME/home/bin/ensure-asdf" || exit 1
+
+printf '\n=== Installing asdf-managed tools ===\n'
+for tool in direnv jq github-cli
+do
+    version=$(asdf latest "$tool")
+    if asdf list "$tool" 2>/dev/null | grep -qF "$version"
+    then
+        echo "$tool $version already installed."
+    else
+        echo "Installing $tool $version..."
+        asdf install "$tool" "$version"
+    fi
+    asdf set -u "$tool" "$version"
+    echo "$tool $version set as global."
+done
+
+printf '\n=== Generating personal SSH key ===\n'
+genSshKey "$PERSONAL_NAME - personal GitHub" "$PERSONAL_SSH_KEY"
+
+printf '\n=== Generating personal GPG key ===\n'
+genGpgKey "$PERSONAL_NAME (personal GitHub) <$PERSONAL_EMAIL>" "$PERSONAL_EMAIL"
+
+FINGERPRINT=$(getGpgFingerprint "$PERSONAL_EMAIL")
+
+cat <<EOF
+
+=== Bootstrap complete ===
+
+Add your personal SSH public key to GitHub:
+EOF
+cat "$PERSONAL_SSH_KEY.pub"
+
+cat <<EOF
+
+Add your personal GPG key to GitHub:
+EOF
+gpg --armor --export "$FINGERPRINT"
+
+printf '\nNext: run setup-git-personal (personal machine) or setup-git-work <email> (work machine)\n'

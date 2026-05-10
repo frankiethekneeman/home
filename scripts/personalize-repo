@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+. "$HOME/home/shrecipes/identity.shrc"
+
+FINGERPRINT=$(getGpgFingerprint "$PERSONAL_EMAIL")
+if [[ -z "$FINGERPRINT" ]]
+then
+    echo "No personal GPG key found for $PERSONAL_EMAIL — run bootstrap first." >&2
+    exit 1
+fi
+
+CURRENT_URL=$(git remote get-url origin 2>/dev/null) || {
+    echo "No 'origin' remote found." >&2
+    exit 1
+}
+
+if [[ "$CURRENT_URL" =~ ^git@github\.com:(.+)$ ]]
+then
+    NEW_URL="git@github.com-personal:${BASH_REMATCH[1]}"
+elif [[ "$CURRENT_URL" =~ ^https://github\.com/(.+)$ ]]
+then
+    NEW_URL="git@github.com-personal:${BASH_REMATCH[1]}"
+elif [[ "$CURRENT_URL" =~ ^git@github\.com-personal: ]]
+then
+    NEW_URL="$CURRENT_URL"
+    echo "Remote is already using personal alias."
+else
+    echo "origin doesn't look like a GitHub URL: $CURRENT_URL" >&2
+    exit 1
+fi
+
+cat <<EOF
+This will set repo-local personal config:
+  user.name  = $PERSONAL_NAME
+  user.email = $PERSONAL_EMAIL
+  signingkey = $FINGERPRINT
+  origin     = $CURRENT_URL
+EOF
+if [[ "$NEW_URL" != "$CURRENT_URL" ]]
+then
+    echo "           → $NEW_URL"
+fi
+echo
+read -rp "Confirm? [y/N] " answer
+[[ "${answer,,}" != "y" ]] && echo "Aborted." && exit 0
+
+git config user.name "$PERSONAL_NAME"
+git config user.email "$PERSONAL_EMAIL"
+git config user.signingkey "$FINGERPRINT"
+git config commit.gpgsign true
+
+if [[ "$NEW_URL" != "$CURRENT_URL" ]]
+then
+    git remote set-url origin "$NEW_URL"
+    echo "Remote updated."
+fi
+
+echo "Done."

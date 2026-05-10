@@ -1,0 +1,85 @@
+export PERSONAL_NAME="Francis Sirizzotti"
+export PERSONAL_EMAIL="francis@sirizzotti.info"
+export PERSONAL_SSH_KEY="$HOME/.ssh/id_github_personal"
+export WORK_SSH_KEY="$HOME/.ssh/id_github_work"
+
+function genSshKey() {
+    LABEL="${1:?Please provide a label for the SSH key}"
+    KEYFILE="${2:?Please provide a destination path for the key file}"
+    if [[ -f "$KEYFILE" ]]
+    then
+        echo "SSH key already exists: $KEYFILE"
+        return 0
+    fi
+    local PASSPHRASE
+    read -rs -p "Passphrase for $LABEL SSH key: " PASSPHRASE; echo
+    ssh-keygen -t ed25519 -C "$LABEL" -f "$KEYFILE" -N "$PASSPHRASE"
+}
+
+function genGpgKey() {
+    KEY_UID="${1:?Please provide the full GPG UID (e.g. Name (comment) <email>)}"
+    EMAIL="${2:?Please provide the email address for this key}"
+    if gpg --list-secret-keys "$EMAIL" &>/dev/null
+    then
+        echo "GPG key already exists for $EMAIL"
+        return 0
+    fi
+    local PASSPHRASE
+    read -rs -p "Passphrase for $EMAIL GPG key: " PASSPHRASE; echo
+    gpg --batch --pinentry-mode loopback \
+        --passphrase "$PASSPHRASE" \
+        --quick-gen-key "$KEY_UID" ed25519 sign 0
+}
+
+function getGpgFingerprint() {
+    EMAIL="${1:?Please provide an email address to look up}"
+    gpg --list-secret-keys --with-colons "$EMAIL" 2>/dev/null | awk -F: '/^fpr/{print $10; exit}'
+}
+
+function ensureSshConfig() {
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+    local CONFIG="${SSH_CONFIG_FILE:-$HOME/.ssh/config}"
+    [[ -f "$CONFIG" ]] || touch "$CONFIG"
+    chmod 600 "$CONFIG"
+}
+
+function addSshBlock() {
+    HOST="${1:?Please provide the SSH Host pattern}"
+    BLOCK="${2:?Please provide the SSH config block to append}"
+    local CONFIG="${SSH_CONFIG_FILE:-$HOME/.ssh/config}"
+    local FULL_BLOCK="Host ${HOST}"$'\n'"${BLOCK}"
+
+    if grep -qF "Host $HOST" "$CONFIG" 2>/dev/null
+    then
+        echo "Host $HOST already exists — replacing." >&2
+        local BLOCK_FILE TMP
+        BLOCK_FILE=$(mktemp)
+        TMP=$(mktemp)
+        printf '%s\n' "$FULL_BLOCK" > "$BLOCK_FILE"
+        awk -v host="$HOST" '
+            FNR == NR { lines[NR] = $0; n = NR; next }
+            $0 ~ "^Host[[:space:]]+" host "([[:space:]]|$)" {
+                in_block = 1; next
+            }
+            in_block && /^Host[[:space:]]/ {
+                for (i = 1; i <= n; i++) print lines[i]
+                print ""
+                in_block = 0
+            }
+            in_block { next }
+            { last = $0; print }
+            END {
+                if (in_block) {
+                    if (last != "") print ""
+                    for (i = 1; i <= n; i++) print lines[i]
+                }
+            }
+        ' "$BLOCK_FILE" "$CONFIG" > "$TMP"
+        mv "$TMP" "$CONFIG"
+        rm -f "$BLOCK_FILE"
+    else
+        [[ -s "$CONFIG" ]] && printf '\n' >> "$CONFIG"
+        printf '%s\n' "$FULL_BLOCK" >> "$CONFIG"
+    fi
+}

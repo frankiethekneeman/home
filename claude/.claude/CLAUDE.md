@@ -104,6 +104,16 @@ When outputting raw markdown that the user will copy (tickets, docs, etc.):
 
 ---
 
+# Engineering Standards
+
+Before writing any code: read `.claude/standards/code-style.md`
+Before writing any tests: read `.claude/standards/testing.md`
+Before approaching a new problem: read `.claude/standards/problem-solving.md`
+Before reviewing or producing any repo-level artifacts (READMEs, PRs, CI, docs): read `.claude/standards/excellence.md`
+Always: read `.claude/standards/communication.md`
+
+---
+
 # Claude Dotfiles Configuration
 
 This directory (`~/home/claude/`) is the portability layer for Claude Code config, loaded via the `claude` alias in `~/home/shrecipes/claude.shrc`.
